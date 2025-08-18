@@ -1,0 +1,21 @@
+# Dependencies folder.
+# This folder is automatically created when you run `npm install`.
+# It can be very large and should never be pushed to GitHub.
+/node_modules
+
+# Environment variables file.
+# This file contains your secret database password and other sensitive keys.
+# It is the most important file to ignore for security reasons.
+.env
+
+# Log files
+# These are generated during runtime and are not part of the source code.
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating System generated files
+.DS_Store
+Thumbs.db
