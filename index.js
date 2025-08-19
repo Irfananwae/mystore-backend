@@ -30,11 +30,17 @@ db.once('open', () => console.log('Successfully Connected to the Database'));
 
 // --- API Routes ---
 // Any request that starts with /products will be handled by this router
+// --- NEW, CORRECTED CODE ---
 const productsRouter = require('./routes/products');
 app.use('/products', productsRouter);
-const authRouter = require('./routes/auth');
-app.use('/auth', authRouter); // All requests to /auth will be handled here
 
+// This is the main fix. We use destructuring to get the 'router' property
+// from the object exported by 'routes/auth.js'.
+const { router: authRouter } = require('./routes/auth');
+app.use('/auth', authRouter);
+
+const billsRouter = require('./routes/bills');
+app.use('/bills', billsRouter);
 // A simple root route to check if the server is running
 app.get('/', (req, res) => {
     res.send('Grocery App Backend is running!');
