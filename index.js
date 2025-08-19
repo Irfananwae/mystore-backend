@@ -32,6 +32,8 @@ db.once('open', () => console.log('Successfully Connected to the Database'));
 // Any request that starts with /products will be handled by this router
 const productsRouter = require('./routes/products');
 app.use('/products', productsRouter);
+const authRouter = require('./routes/auth');
+app.use('/auth', authRouter); // All requests to /auth will be handled here
 
 // A simple root route to check if the server is running
 app.get('/', (req, res) => {
