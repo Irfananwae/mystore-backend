@@ -37,11 +37,14 @@ app.use('/products', productsRouter);
 
 // Authentication Router
 // This correctly imports the 'router' object from auth.js
-const { router: authRouter } = require('./routes/auth');
-app.use('/auth', authRouter);
-
-// Bills Router (Declared only once)
+const { router: authRouter } = require('./routes/auth'); // Corrected import
+const productsRouter = require('./routes/products');
 const billsRouter = require('./routes/bills');
+
+// ... (app.use(cors), app.use(express.json))
+
+app.use('/auth', authRouter); // Corrected usage
+app.use('/products', productsRouter);
 app.use('/bills', billsRouter);
 
 // --- Start The Server ---
