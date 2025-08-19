@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 // POST /auth/signup
 router.post('/signup', async (req, res) => {
     console.log("--- SIGNUP REQUEST RECEIVED ---");
-    console.log("Request Body:", req.body); // This will show us if data is arriving from the app
+    console.log("Request Body:", req.body);
     try {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -31,7 +31,7 @@ router.post('/signup', async (req, res) => {
 // POST /auth/login
 router.post('/login', async (req, res) => {
     console.log("--- LOGIN REQUEST RECEIVED ---");
-    console.log("Request Body:", req.body); // This will show us if data is arriving
+    console.log("Request Body:", req.body);
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Middleware
+// Middleware (no changes needed)
 const verifyToken = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
