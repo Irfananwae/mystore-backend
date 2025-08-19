@@ -7,16 +7,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Database Connection ---
-mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true });
-const db = mongoose.connection;
-db.on('error', (error) => console.error(error));
-db.once('open', () => console.log('Connected to Database'));
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to MongoDB Atlas'))
+    .catch(err => console.error('Could not connect to MongoDB Atlas...', err));
 
 // --- Middleware ---
+// Allow requests from any origin
 app.use(cors());
+// Parse JSON bodies (as sent by API clients)
 app.use(express.json());
 
-// --- Routers (Declared only ONCE) ---
+// --- Routers ---
 const { router: authRouter } = require('./routes/auth');
 const productsRouter = require('./routes/products');
 const billsRouter = require('./routes/bills');
@@ -26,6 +27,10 @@ app.use('/auth', authRouter);
 app.use('/products', productsRouter);
 app.use('/bills', billsRouter);
 
+// --- Simple Welcome Route ---
+app.get('/', (req, res) => {
+    res.send('Welcome to the MyStoreApp Backend API!');
+});
 
 // --- Start Server ---
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server started and listening on port ${PORT}`));
