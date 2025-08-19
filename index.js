@@ -4,16 +4,16 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // --- Database Connection ---
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
-    .then(() => console.log('DATABASE CONNECTION SUCCESSFUL'))
+    .then(() => console.log('DATABASE CONNECTION SUCCESSFUL')) // <-- The new message
     .catch(err => console.error('---!!! DATABASE CONNECTION FAILED !!!---', err));
 
 // --- Middleware ---
 app.use(cors());
-app.use(express.json()); // This MUST be before the routers
+app.use(express.json());
 
 // --- Routers ---
 const { router: authRouter } = require('./routes/auth');
