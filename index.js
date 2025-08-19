@@ -44,3 +44,5 @@ app.get('/', (req, res) => {
 // --- Start The Server ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server has started and is running on port ${PORT}`));
+const billsRouter = require('./routes/bills');
+app.use('/bills', billsRouter);
