@@ -1,67 +1,94 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user');
+const User = require('../models/user'); // Make sure the path to your user model is correct
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// POST /auth/signup
+// POST /auth/signup - Register a new user
 router.post('/signup', async (req, res) => {
-    console.log("--- SIGNUP REQUEST RECEIVED ---");
-    console.log("Request Body:", req.body);
     try {
         const { email, password } = req.body;
+
+        // 1. Validate input
         if (!email || !password) {
-            console.log("Signup failed: Missing email or password.");
             return res.status(400).json({ message: "Email and password are required." });
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ email, password: hashedPassword });
-        await user.save();
-        console.log("Signup successful for:", email);
-        res.status(201).json({ message: "User created successfully" });
-    } catch (error) {
-        console.error("---!!! SIGNUP ERROR !!!---", error);
-        if (error.code === 11000) {
+
+        // 2. Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
             return res.status(409).json({ message: "Email already in use." });
         }
+
+        // 3. Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 4. Create and save the new user
+        const user = new User({ email, password: hashedPassword });
+        await user.save();
+
+        res.status(201).json({ message: "User created successfully" });
+
+    } catch (error) {
+        console.error("--- SIGNUP ERROR ---", error);
         res.status(500).json({ message: "Server error during signup." });
     }
 });
 
-// POST /auth/login
+// POST /auth/login - Log in and return a JWT
 router.post('/login', async (req, res) => {
-    console.log("--- LOGIN REQUEST RECEIVED ---");
-    console.log("Request Body:", req.body);
     try {
         const { email, password } = req.body;
+
+        // 1. Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
-            console.log("Login failed: User not found for email:", email);
-            return res.status(401).json({ message: "Authentication failed" });
+            // Use a generic error for security (don't reveal if email exists)
+            return res.status(401).json({ message: "Authentication failed: Invalid credentials" });
         }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (isMatch) {
-            console.log("Login successful for:", email);
-            const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-            res.status(200).json({ message: "Login successful", token: token });
+
+        // 2. Compare the provided password with the stored hashed password
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (isPasswordMatch) {
+            // 3. If passwords match, create the JWT token
+            const token = jwt.sign(
+              { userId: user._id, email: user.email }, // Payload: Data to store in the token
+              process.env.JWT_SECRET,                  // Your secret password from Render environment variables
+              { expiresIn: "7d" }                       // Option: Set the token to expire in 7 days
+            );
+
+            // 4. Send the successful response with the token
+            res.status(200).json({
+                message: "Login successful",
+                token: token
+            });
         } else {
-            console.log("Login failed: Invalid password for email:", email);
-            res.status(401).json({ message: "Authentication failed" });
+            // If passwords do not match, send the same generic error
+            res.status(401).json({ message: "Authentication failed: Invalid credentials" });
         }
     } catch (error) {
-        console.error("---!!! LOGIN ERROR !!!---", error);
+        console.error("--- LOGIN ERROR ---", error);
         res.status(500).json({ message: "Server error during login." });
     }
 });
 
-// Middleware (no changes needed)
+/**
+ * Middleware to verify JWT on protected routes.
+ * How to use: Add `verifyToken` to any route you want to protect.
+ * Example: router.get('/my-products', verifyToken, (req, res) => { ... });
+ */
 const verifyToken = (req, res, next) => {
     try {
+        // Get token from "Authorization: Bearer <token>" header
         const token = req.headers.authorization.split(" ")[1];
-        req.userData = jwt.verify(token, process.env.JWT_SECRET);
-        next();
+        // Check the token's signature against our secret
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        // Attach the user's data to the request for other routes to use
+        req.userData = { userId: decodedToken.userId, email: decodedToken.email };
+        next(); // If token is valid, proceed
     } catch (error) {
-        return res.status(401).json({ message: 'Auth failed' });
+        // If token is invalid or missing, send an error
+        return res.status(401).json({ message: 'Authentication Failed' });
     }
 };
 
