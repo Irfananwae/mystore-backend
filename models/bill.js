@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const billSchema = new mongoose.Schema({
     items: [{
-        // Storing denormalized data to keep a record of the sale at that time
-        _id: false, // Don't save the _id for subdocuments
+        _id: false,
         name: String,
         price: Number,
         quantity: Number
@@ -11,6 +10,12 @@ const billSchema = new mongoose.Schema({
     totalAmount: {
         type: Number,
         required: true
+    },
+    // --- NEW FEATURE ---
+    paymentMethod: {
+        type: String,
+        required: true,
+        enum: ['Cash', 'Online'] // Ensures only these two values are possible
     },
     createdAt: {
         type: Date,
