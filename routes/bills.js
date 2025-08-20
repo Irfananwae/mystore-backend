@@ -3,12 +3,10 @@ const router = express.Router();
 const Bill = require('../models/bill');
 const { verifyToken } = require('./auth');
 
+
 // POST: Save a new bill
 router.post('/', verifyToken, async (req, res) => {
     try {
-        // --- THIS IS THE FIX ---
-        // The app sends items with a nested 'product' object.
-        // We must extract the details to match our database schema.
         const formattedItems = req.body.items.map(item => ({
             name: item.product.name,
             price: item.product.price,
@@ -16,8 +14,9 @@ router.post('/', verifyToken, async (req, res) => {
         }));
 
         const bill = new Bill({
-            items: formattedItems, // Use the correctly formatted items
-            totalAmount: req.body.totalAmount
+            items: formattedItems,
+            totalAmount: req.body.totalAmount,
+            paymentMethod: req.body.paymentMethod // <-- ADD THIS LINE
         });
 
         const newBill = await bill.save();
@@ -27,6 +26,9 @@ router.post('/', verifyToken, async (req, res) => {
         res.status(400).json({ message: "Error saving bill" });
     }
 });
+
+// The GET and DELETE routes are correct and do not need to be changed.
+
 
 // GET: Get all saved bills (no changes needed, but included for completeness)
 router.get('/', verifyToken, async (req, res) => {
