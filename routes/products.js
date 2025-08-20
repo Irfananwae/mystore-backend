@@ -47,7 +47,6 @@ router.post('/', verifyToken, async (req, res) => {
         res.status(400).json({ message: "Error saving product" });
     }
 });
-
 // PUT (Update): Update a product by its unique MongoDB ID. (Protected)
 router.put('/:id', verifyToken, async (req, res) => {
     try {
@@ -59,6 +58,23 @@ router.put('/:id', verifyToken, async (req, res) => {
     } catch (err) {
         console.error("Error updating product:", err);
         res.status(400).json({ message: "Error updating product" });
+    }
+    });
+    // Inside routes/products.js
+
+// ... (Your GET, POST, and PUT routes are all correct and do not need to change)
+
+// --- NEW FEATURE: DELETE a product by its unique ID ---
+router.delete('/:id', verifyToken, async (req, res) => {
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json({ message: "Product deleted successfully" });
+    } catch (err) {
+        console.error("Error deleting product:", err);
+        res.status(500).json({ message: "Server error" });
     }
 });
 
