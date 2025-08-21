@@ -30,11 +30,25 @@ router.post('/', verifyToken, async (req, res) => {
 // The GET and DELETE routes are correct and do not need to be changed.
 
 
-// GET: Get all saved bills (no changes needed, but included for completeness)
+// GET: Get all saved bills (NOW WITH PAGINATION)
+// Example request: /bills?page=1&limit=20
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const bills = await Bill.find().sort({ createdAt: -1 });
-        res.json(bills);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skipIndex = (page - 1) * limit;
+
+        const totalBills = await Bill.countDocuments();
+        const bills = await Bill.find()
+            .sort({ createdAt: -1 }) // Sort by newest first
+            .limit(limit)
+            .skip(skipIndex);
+
+        res.json({
+            bills: bills,
+            totalPages: Math.ceil(totalBills / limit),
+            currentPage: page
+        });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }
