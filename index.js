@@ -31,6 +31,7 @@ const billsRouter = require('./routes/bills');
 app.use('/auth', authRouter);
 app.use('/products', productsRouter);
 app.use('/bills', billsRouter);
+app.use('/dashboard', dashboardRouter);
 
 app.get('/', (req, res) => res.send('MyStoreApp Backend is running.'));
 
