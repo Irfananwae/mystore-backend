@@ -39,26 +39,29 @@ router.get('/', verifyToken, async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+// Inside routes/products.js
 
-// POST: Add a new product to the database. (Protected)
+// POST: Add a new product
 router.post('/', verifyToken, async (req, res) => {
     const product = new Product({
         barcode: req.body.barcode,
         name: req.body.name,
         price: req.body.price,
-        quantity: req.body.quantity || 0
+        quantity: req.body.quantity
     });
     try {
         const newProduct = await product.save();
         res.status(201).json(newProduct);
     } catch (err) {
+        // --- THIS IS THE NEW ERROR HANDLING ---
+        // Check for the duplicate key error code from MongoDB
         if (err.code === 11000) {
             return res.status(409).json({ message: "Product with this barcode already exists." });
         }
-        console.error("Error adding product:", err);
-        res.status(400).json({ message: "Error saving product" });
+        res.status(400).json({ message: "Failed to add product" });
     }
 });
+
 // PUT (Update): Update a product by its unique MongoDB ID. (Protected)
 router.put('/:id', verifyToken, async (req, res) => {
     try {
