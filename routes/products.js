@@ -17,13 +17,25 @@ router.get('/:barcode', async (req, res) => {
     }
 });
 
-// GET: Get a list of ALL products. (Protected)
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const products = await Product.find().sort({ name: 1 }); // Sort alphabetically
-        res.json(products);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20; // Default to 20 items per page
+        const skipIndex = (page - 1) * limit;
+
+        const totalProducts = await Product.countDocuments();
+        const products = await Product.find()
+            .sort({ name: 1 }) // Sort alphabetically
+            .limit(limit)
+            .skip(skipIndex);
+
+        res.json({
+            products: products,
+            totalPages: Math.ceil(totalProducts / limit),
+            currentPage: page
+        });
     } catch (err) {
-        console.error("Error fetching all products:", err);
+        console.error("Error fetching paginated products:", err);
         res.status(500).json({ message: "Server error" });
     }
 });
