@@ -5,7 +5,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-
+const dashboardRouter = require('./routes/dashboard');
 // --- Database Connection ---
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
     .then(() => console.log('DATABASE CONNECTION SUCCESSFUL'))
