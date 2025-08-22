@@ -3,11 +3,15 @@ const router = express.Router();
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Signup Route
 router.post('/signup', async (req, res) => {
     try {
         const { email, password, ownerName, shopName } = req.body;
+        if (!email || !password || !ownerName || !shopName) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ email, password: hashedPassword, ownerName, shopName });
         await newUser.save();
@@ -44,4 +48,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// --- THIS IS THE CRITICAL FIX ---
+// This file now ONLY exports the router.
 module.exports = router;
