@@ -1,25 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
 const Bill = require('../models/bill');
 const Product = require('../models/product');
-
-function verifyToken(req, res, next) {
-    const bearerHeader = req.headers['authorization'];
-    if (typeof bearerHeader !== 'undefined') {
-        const bearer = bearerHeader.split(' ');
-        const bearerToken = bearer[1];
-        jwt.verify(bearerToken, process.env.JWT_SECRET, (err, authData) => {
-            if (err) {
-                return res.sendStatus(403);
-            }
-            req.authData = authData;
-            next();
-        });
-    } else {
-        res.sendStatus(403);
-    }
-}
+const { verifyToken } = require('../middleware/authMiddleware'); // Correct import
 
 router.get('/stats', verifyToken, async (req, res) => {
     try {
@@ -46,9 +29,7 @@ router.get('/stats', verifyToken, async (req, res) => {
             { $limit: 5 }
         ]);
 
-        const lowStockProducts = await Product.find({ quantity: { $lte: 5 } })
-            .sort({ quantity: 1 })
-            .limit(5);
+        const lowStockProducts = await Product.find({ quantity: { $lte: 5 } }).sort({ quantity: 1 }).limit(5);
 
         res.json({
             todaysCashSales,
@@ -57,9 +38,7 @@ router.get('/stats', verifyToken, async (req, res) => {
             topSellingProducts,
             lowStockProducts
         });
-
     } catch (error) {
-        console.error("Dashboard Stats Error:", error);
         res.status(500).json({ message: "Server error" });
     }
 });
