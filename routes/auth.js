@@ -1,27 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-const bcrypt = require('bcryptjs'); // The fix: changed from 'bcrypt' to 'bcryptjs'
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
-function verifyToken(req, res, next) {
-    const bearerHeader = req.headers['authorization'];
-    if (typeof bearerHeader !== 'undefined') {
-        const bearer = bearerHeader.split(' ');
-        const bearerToken = bearer[1];
-        req.token = bearerToken;
-        jwt.verify(req.token, process.env.JWT_SECRET, (err, authData) => {
-            if (err) {
-                res.sendStatus(403);
-            } else {
-                req.authData = authData;
-                next();
-            }
-        });
-    } else {
-        res.sendStatus(403);
-    }
-}
 
 // Signup Route
 router.post('/signup', async (req, res) => {
@@ -68,4 +49,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-module.exports = { router, verifyToken };
+// --- THIS IS THE CRITICAL FIX ---
+// We now only export the router, making it consistent with all other route files.
+module.exports = router;
