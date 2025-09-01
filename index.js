@@ -8,7 +8,7 @@ const authRouter = require('./routes/auth');
 const productRouter = require('./routes/products');
 const billRouter = require('./routes/bills');
 const dashboardRouter = require('./routes/dashboard');
-
+const customerRouter = require('./routes/customers');
 // Initialize Express App
 const app = express();
 
@@ -42,7 +42,7 @@ app.use('/auth', authRouter);
 app.use('/products', productRouter);
 app.use('/bills', billRouter);
 app.use('/dashboard', dashboardRouter);
-
+app.use('/customers', customerRouter);
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
