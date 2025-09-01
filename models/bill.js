@@ -11,6 +11,10 @@ const billSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    customer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Customer' // This links the bill to a customer
+    },
     // --- NEW FEATURE ---
     paymentMethod: {
         type: String,
