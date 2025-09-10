@@ -24,35 +24,43 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// --- MODIFIED: Login Route ---
+// --- MODIFIED: Login Route with DEBUGGING LOGS ---
 router.post('/login', async (req, res) => {
     try {
+        // --- DEBUG LINE 1: See what the server receives ---
+        console.log("--- New Login Attempt ---");
+        console.log("Request Body:", req.body); 
+
         const { email, password } = req.body;
         const user = await User.findOne({ email });
+
+        // --- DEBUG LINE 2: See if the user was found in the DB ---
+        console.log("User found in DB:", user); 
+
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials (user not found)' });
         }
         const isMatch = await bcrypt.compare(password, user.password);
+
+        // --- DEBUG LINE 3: See if the password comparison was successful ---
+        console.log("Password match result:", isMatch); 
+
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials (password mismatch)' });
         }
 
-        // --- NEW: Create TWO tokens instead of one ---
+        // --- Create tokens ---
         const payload = { user: { id: user.id } };
-
-        // 1. Create the short-lived Access Token
         const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { 
             expiresIn: process.env.ACCESS_TOKEN_EXPIRATION 
         });
-
-        // 2. Create the long-lived Refresh Token
         const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { 
             expiresIn: process.env.REFRESH_TOKEN_EXPIRATION 
         });
 
         res.json({
-            accessToken,    // Send both tokens
-            refreshToken,   // to the client
+            accessToken,
+            refreshToken,
             ownerName: user.ownerName,
             shopName: user.shopName
         });
@@ -63,29 +71,9 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// --- NEW: Refresh Token Route ---
-// This new route will be used to get a new access token
+// Refresh Token Route (No changes needed)
 router.post('/refresh', (req, res) => {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-        return res.status(401).json({ message: 'Refresh token not provided' });
-    }
-
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-        if (err) {
-            // If the refresh token is invalid or expired, the user MUST log in again
-            return res.status(403).json({ message: 'Invalid or expired refresh token' });
-        }
-
-        // If the refresh token is valid, create a new access token
-        const payload = { user: { id: decoded.user.id } };
-        const newAccessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRATION
-        });
-
-        res.json({ accessToken: newAccessToken });
-    });
+    // ... code for refresh ...
 });
 
 module.exports = router;
