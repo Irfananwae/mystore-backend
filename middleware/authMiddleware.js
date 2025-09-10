@@ -6,8 +6,12 @@ function verifyToken(req, res, next) {
     if (typeof bearerHeader !== 'undefined') {
         const bearer = bearerHeader.split(' ');
         const bearerToken = bearer[1];
-        jwt.verify(bearerToken, process.env.JWT_SECRET, (err, authData) => {
+        
+        // --- THIS IS THE FIX ---
+        // We now use the correct secret to verify the token.
+        jwt.verify(bearerToken, process.env.ACCESS_TOKEN_SECRET, (err, authData) => {
             if (err) {
+                // This is why it was failing. The secrets didn't match.
                 return res.sendStatus(403); // Forbidden
             }
             req.authData = authData;
