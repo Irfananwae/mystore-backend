@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-
+const messagingRouter = require('./routes/messaging');
 // Import Routers
 const authRouter = require('./routes/auth');
 const productRouter = require('./routes/products');
@@ -47,4 +47,5 @@ app.use('/customers', customerRouter);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT} and is accessible on your network`);
+app.use('/messaging', messagingRouter);
 });
